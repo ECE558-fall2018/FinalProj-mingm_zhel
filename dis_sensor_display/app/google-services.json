@@ -1,0 +1,143 @@
+{
+  "project_info": {
+    "project_number": "659605311444",
+    "firebase_url": "https://test-e23b2.firebaseio.com",
+    "project_id": "test-e23b2",
+    "storage_bucket": "test-e23b2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:659605311444:android:39edc59b7833da50",
+        "android_client_info": {
+          "package_name": "com.example.test"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "659605311444-7mh9k3bnff5sa2f1j14mghk5qpf5q5i2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.test",
+            "certificate_hash": "01f41890432adb308fdad0424beec8f439f705fe"
+          }
+        },
+        {
+          "client_id": "659605311444-85562kj4ii41mtd5pdj9nggmqtdjpvqk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQ_BuAF0xIeNEvlKx1AXXOhLUv2kcD0Bw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "659605311444-85562kj4ii41mtd5pdj9nggmqtdjpvqk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:659605311444:android:be55a7123096d193",
+        "android_client_info": {
+          "package_name": "com.example.test1"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "659605311444-dgh6aorrinjfrv3d4ptuggogqjud6ejk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.test1",
+            "certificate_hash": "01f41890432adb308fdad0424beec8f439f705fe"
+          }
+        },
+        {
+          "client_id": "659605311444-85562kj4ii41mtd5pdj9nggmqtdjpvqk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQ_BuAF0xIeNEvlKx1AXXOhLUv2kcD0Bw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "659605311444-85562kj4ii41mtd5pdj9nggmqtdjpvqk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:659605311444:android:5f8057854799ca7d",
+        "android_client_info": {
+          "package_name": "edu.pdx.android.ece558finalproject.mingm.distance_sensor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "659605311444-ov4rtf7gg328hig2nt5ac7algbuf7oc2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "edu.pdx.android.ece558finalproject.mingm.distance_sensor",
+            "certificate_hash": "674f9fa36c3a4b64c8844cd6dd519aaaa40b560c"
+          }
+        },
+        {
+          "client_id": "659605311444-85562kj4ii41mtd5pdj9nggmqtdjpvqk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQ_BuAF0xIeNEvlKx1AXXOhLUv2kcD0Bw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "659605311444-85562kj4ii41mtd5pdj9nggmqtdjpvqk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

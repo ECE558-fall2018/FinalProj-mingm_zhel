@@ -6,6 +6,8 @@ import android.util.Log;
 
 import com.google.android.things.pio.Gpio;
 import com.google.android.things.pio.PeripheralManager;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -123,6 +125,10 @@ public class DistanceSensor extends Activity {
             DecimalFormat df = new DecimalFormat("#.00");
             String formatedDistance = df.format(Distance);
             mDistance = formatedDistance;
+
+            FirebaseDatabase database = FirebaseDatabase.getInstance();
+            DatabaseReference distanceRef = database.getReference("Distance");
+            distanceRef.setValue(mDistance);
         }
         Log.i(TAG, "Distance: " + mDistance + "cm");
         //System.out.println("Calculated Distance: " + mDistance);
