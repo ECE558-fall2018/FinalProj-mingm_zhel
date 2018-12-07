@@ -2,16 +2,13 @@ package edu.pdx.android.ece558finalproject.mingm.distance_sensor;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.text.BoringLayout;
 import android.util.Log;
-
 import com.google.android.things.pio.Gpio;
 import com.google.android.things.pio.PeripheralManager;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -19,80 +16,39 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-
 import android.Manifest;
-import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.media.Image;
 import android.media.ImageReader;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.KeyEvent;
-import android.widget.Toast;
-
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.things.contrib.driver.button.Button;
 import com.google.android.things.contrib.driver.button.ButtonInputDriver;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
-/**
- * Skeleton of an Android Things activity.
- * <p>
- * Android Things peripheral APIs are accessible through the class
- * PeripheralManagerService. For example, the snippet below will open a GPIO pin and
- * set it to HIGH:
- *
- * <pre>{@code
- * PeripheralManagerService service = new PeripheralManagerService();
- * mLedGpio = service.openGpio("BCM6");
- * mLedGpio.setDirection(Gpio.DIRECTION_OUT_INITIALLY_LOW);
- * mLedGpio.setValue(true);
- * }</pre>
- * <p>
- * For more complex peripherals, look for an existing user-space driver, or implement one if none
- * is available.
- *
- * @see <a href="https://github.com/androidthings/contrib-drivers#readme">https://github.com/androidthings/contrib-drivers#readme</a>
- */
+
 public class DistanceSensor extends Activity {
 
     private static final String TAG = DistanceSensor.class.getSimpleName();
-
+    //Reference to Firebase Database and Firebase Storage
     private FirebaseDatabase mDatabase;
     private FirebaseStorage mStorage;
     private Camera mCamera;
 
     private ButtonInputDriver mButtonInputDriver;
-
     private Handler mCameraHandler;
     private HandlerThread mCameraThread;
-
-    /**
-     * A {@link Handler} for running Cloud tasks in the background.
-     */
-    private Handler mCloudHandler;
-
-    /**
-     * An additional thread for running Cloud tasks that shouldn't block the UI.
-     */
-    private HandlerThread mCloudThread;
-
-
 
 
     //Variable for Distance Sensor
@@ -101,7 +57,6 @@ public class DistanceSensor extends Activity {
     private Gpio mEcho;
     private Gpio mTrigger;
     private String mDistance;
-    private int mEnable;
 
 
     //Variable for LCD display
@@ -118,6 +73,7 @@ public class DistanceSensor extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_distance_sensor);
 
+        //Initially, set the value of Enable to false.
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference initialRef = database.getReference("Enable");
         initialRef.setValue("false");
@@ -140,12 +96,6 @@ public class DistanceSensor extends Activity {
         mCameraThread = new HandlerThread("CameraBackground");
         mCameraThread.start();
         mCameraHandler = new Handler(mCameraThread.getLooper());
-
-
-        // Initialize the doorbell button driver
-        initPIO();
-
-        // Camera code is complicated, so we've shoved it all in this closet class for you.
         mCamera = Camera.getInstance();
         mCamera.initializeCamera(this, mCameraHandler, mOnImageAvailableListener);
 
@@ -174,18 +124,20 @@ public class DistanceSensor extends Activity {
             Log.e(TAG,"Error on Peripheral Output API", e);
             e.printStackTrace();
         }
-
+        // connect firebase "Enable" child to control the image taken
         FirebaseDatabase database_r = FirebaseDatabase.getInstance();
         final DatabaseReference mRef = database_r.getReference("Enable");
         mRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String ADC5IN = String.valueOf(dataSnapshot.getValue());
-                boolean m = Boolean.valueOf(ADC5IN);
-                System.out.println("Test for ADC5IN" + ADC5IN);
+                String mEnable = String.valueOf(dataSnapshot.getValue());
+                boolean m = Boolean.valueOf(mEnable);
+                // if the enable is true, take the picture and set the enable to zero.
                 if(m == true) {
                     mCamera.takePicture();
+                    mRef.setValue("false");
                 } else {
+                    //otherwise pint the message to test
                     System.out.println("Test for Range");
                 }
             }
@@ -195,11 +147,9 @@ public class DistanceSensor extends Activity {
 
             }
         });
-
-
+        //Start the new Thread called calc_distance.
         Thread thread = new Thread(calc_distance);
         thread.start();
-
     }
 
     protected void readDistance() throws IOException, InterruptedException{
@@ -229,40 +179,41 @@ public class DistanceSensor extends Activity {
         //Assume the speed of sound in air is about 340m/s
         Double Distance = ((pulseWidth / 1000000000.0) * 340.0 / 2.0) * 100.0;
 
+        //We set the max detection range is 50cm. If the distance is greater than 50cm, the Distance
+        //will not show in the LCD display because the measured value is very bad and is not stable.
         if(Distance <= 50.00){
-
+            //Format the calculated distance value to 2 decimal points.
             DecimalFormat df = new DecimalFormat("#.00");
             String formatedDistance = df.format(Distance);
             mDistance = formatedDistance;
 
+            //Send the calculated and formatted distance value to Firebase Database.
             FirebaseDatabase database = FirebaseDatabase.getInstance();
             DatabaseReference distanceRef = database.getReference("Distance");
             distanceRef.setValue(mDistance);
-            DatabaseReference enableRef = database.getReference("Enable");
-            if(Distance <= 15.00 && Distance >= 10.00){
-                enableRef.setValue("true");
-            } else {
-                enableRef.setValue("false");
-            }
         }
+        //For testing calculated distance.
         Log.i(TAG, "Distance: " + mDistance + "cm");
-        //System.out.println("Calculated Distance: " + mDistance);
     }
 
+    //Thread used to calculated the distance and show the distance on the LCD display
     private Runnable calc_distance = new Runnable() {
         @Override
         public void run() {
             try{
+                //Set the connections for LCD display
                 lcd = new Lcd1602(GPIO_LCD_RS, GPIO_LCD_EN, GPIO_LCD_D4, GPIO_LCD_D5, GPIO_LCD_D6, GPIO_LCD_D7);
+                //The LCD has two rows and each row has 16 columns.
                 lcd.begin(16, 2);
 
+                //Infinite repeating loop to calculate the distance and show the distance on the LCD display.
                 while(true){
                     readDistance();
-                    Thread.sleep(2000);
-                    lcd.clear();
-                    lcd.print("Distance:" + mDistance + "cm");
-                    lcd.setCursor(0, 1);
-                    lcd.print(getCurrentTime());
+                    Thread.sleep(2000);  //The pause between different calculated distance.
+                    lcd.clear(); //clear LCD display before writing new data
+                    lcd.print("Distance:" + mDistance + "cm"); //Write calculated distance to LCD display
+                    lcd.setCursor(0, 1); //Move the cursor to row 1 and column 0. Ready for writing data to row 1.
+                    lcd.print(getCurrentTime());  //Write the current time to row 1.
                 }
             } catch (IOException e){
                 e.printStackTrace();
@@ -271,19 +222,6 @@ public class DistanceSensor extends Activity {
             }
         }
     };
-
-    private void initPIO() {
-        try {
-            mButtonInputDriver = new ButtonInputDriver(
-                    BoardDefaults.getGPIOForButton(),
-                    Button.LogicState.PRESSED_WHEN_LOW,
-                    KeyEvent.KEYCODE_ENTER);
-            mButtonInputDriver.register();
-        } catch (IOException e) {
-            mButtonInputDriver = null;
-            Log.w(TAG, "Could not open GPIO pins", e);
-        }
-    }
 
     protected void onDestroy() {
         super.onDestroy();
@@ -308,6 +246,11 @@ public class DistanceSensor extends Activity {
 
     }
 
+    /**
+     * method to get the local time
+     *
+     * @return localTime that will be used to display
+     */
     public String getCurrentTime(){
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT-8"));
         Date currentLocalTime = cal.getTime();
@@ -316,18 +259,6 @@ public class DistanceSensor extends Activity {
         String localTime = date.format(currentLocalTime);
         return localTime;
     }
-
-    /*@Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_ENTER) {
-            // Doorbell rang!
-            Log.d(TAG, "button pressed");
-            mCamera.takePicture();
-            return true;
-        }
-        return super.onKeyUp(keyCode, event);
-    }
-*/
 
 
     /**
@@ -349,12 +280,12 @@ public class DistanceSensor extends Activity {
             };
 
     /**
-     * Upload image data to Firebase as a doorbell event.
+     * Upload image data to Firebase
      */
     private void onPictureTaken(final byte[] imageBytes) {
         if (imageBytes != null) {
             final DatabaseReference log = mDatabase.getReference("logs").push();
-            final StorageReference imageRef = mStorage.getReference().child(log.getKey());
+            final StorageReference imageRef = mStorage.getReference().child("images").child(log.getKey());
             // upload image to storage
             UploadTask uploadTask = imageRef.putBytes(imageBytes);
             Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
